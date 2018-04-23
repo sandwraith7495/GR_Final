@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">GR_final</string>
+    <string name="choose_from_gallery">Choose from gallery</string>
+    <string name="take_a_photo">Take a photo</string>
+    <string name="server_client_id">178718100636-brmpu4too9i3k3qvo3og9djqaqcpmckf.apps.googleusercontent.com</string>
+</resources>

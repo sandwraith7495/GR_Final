@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "178718100636",
+    "firebase_url": "https://prismatic-rock-193406.firebaseio.com",
+    "project_id": "prismatic-rock-193406",
+    "storage_bucket": "prismatic-rock-193406.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:178718100636:android:4b89f4ab9fa10c04",
+        "android_client_info": {
+          "package_name": "com.example.sandwraith8.gr_final"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "178718100636-brmpu4too9i3k3qvo3og9djqaqcpmckf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.sandwraith8.gr_final",
+            "certificate_hash": "2e6c1eb4f970bd754a4d908bcdf5abbe942c0a3f"
+          }
+        },
+        {
+          "client_id": "178718100636-pn2mgli56jtdri2md1rsaklefqesr3v6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAM-VX59owjMr-LMecB3W3WCBvD6T2bGK8"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "178718100636-pn2mgli56jtdri2md1rsaklefqesr3v6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
