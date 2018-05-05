@@ -1,7 +1,9 @@
 package com.example.sandwraith8.gr_final.model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -15,7 +17,7 @@ import lombok.Setter;
 public class Person {
     private String googleId;
     private String email;
-    private List<Contact> contacts = new ArrayList<>();
+    private Map<String, Contact> contacts = new HashMap<>();
 
     public Person(String googleId) {
         this.googleId = googleId;

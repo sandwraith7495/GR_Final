@@ -8,10 +8,14 @@
             android:id="@+id/nav_local"
             android:title="Danh sách trên máy" />
         <item
-            android:id="@+id/nav_slideshow"
+            android:id="@+id/nav_server"
             android:title="Danh sách trên tài khoản" />
         <item
-            android:id="@+id/nav_manage"
+            android:id="@+id/nav_logout"
+            android:visible="false"
             android:title="Đăng xuất" />
+        <item
+            android:id="@+id/nav_login"
+            android:title="Đăng nhập" />
     </group>
 </menu>

@@ -1,6 +1,8 @@
 package com.example.sandwraith8.gr_final;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -13,14 +15,23 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
-import com.example.sandwraith8.gr_final.fragment.ListLocalContactFragment;
+import com.example.sandwraith8.gr_final.fragment.ListLocalContact;
+import com.example.sandwraith8.gr_final.fragment.ListServerContact;
 import com.example.sandwraith8.gr_final.fragment.MainFragment;
+import com.example.sandwraith8.gr_final.service.GoogleService;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 
 public class Homepage extends AppCompatActivity {
 
     private DrawerLayout mDrawerLayout;
+    private int RC_SIGN_IN = 123;
+    private GoogleSignInClient mGoogleSignInClient;
+    private View headerView;
+    private MenuItem login, logout, server_list;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,13 +46,26 @@ public class Homepage extends AppCompatActivity {
         actionbar.setDisplayHomeAsUpEnabled(true);
         actionbar.setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp);
 
+        mGoogleSignInClient = GoogleService.getInstance().getClient(this);
         NavigationView navigationView = findViewById(R.id.nav_view);
-        View headerView = navigationView.getHeaderView(0);
-        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
-        if (account == null)
+        login = navigationView.getMenu().getItem(4);
+        logout = navigationView.getMenu().getItem(3);
+        server_list = navigationView.getMenu().getItem(2);
+
+        headerView = navigationView.getHeaderView(0);
+        final GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
+        if (account == null) {
             ((TextView) headerView.findViewById(R.id.account)).setText("Khách");
-        else
+            login.setVisible(true);
+            logout.setVisible(false);
+            server_list.setVisible(false);
+        }
+        else {
             ((TextView) headerView.findViewById(R.id.account)).setText(account.getDisplayName());
+            login.setVisible(false);
+            logout.setVisible(true);
+            server_list.setVisible(true);
+        }
         navigationView.setNavigationItemSelectedListener(
                 new NavigationView.OnNavigationItemSelectedListener() {
                     @Override
@@ -53,7 +77,26 @@ public class Homepage extends AppCompatActivity {
                                 changeFragment(new MainFragment());
                                 break;
                             case R.id.nav_local:
-                                changeFragment(new ListLocalContactFragment());
+                                changeFragment(new ListLocalContact());
+                                break;
+                            case R.id.nav_server:
+                                changeFragment(new ListServerContact());
+                                break;
+                            case R.id.nav_logout:
+                                mGoogleSignInClient.signOut()
+                                        .addOnCompleteListener(Homepage.this, new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                login.setVisible(true);
+                                                server_list.setVisible(false);
+                                                logout.setVisible(false);
+                                                ((TextView) headerView.findViewById(R.id.account)).setText("Khách");
+                                            }
+                                        });
+                                break;
+                            case R.id.nav_login:
+                                Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+                                startActivityForResult(signInIntent, RC_SIGN_IN);
                                 break;
                         }
                         return true;
@@ -67,6 +110,18 @@ public class Homepage extends AppCompatActivity {
         transaction.replace(R.id.content_frame, fragment);
         transaction.addToBackStack(null);
         transaction.commit();
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RC_SIGN_IN) {
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+            ((TextView) headerView.findViewById(R.id.account)).setText(task.getResult().getDisplayName());
+            login.setVisible(false);
+            server_list.setVisible(true);
+            logout.setVisible(true);
+        }
     }
 
     @Override

@@ -4,6 +4,8 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
+import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -11,6 +13,7 @@ import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
 import android.util.Base64;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
 import android.widget.Button;
@@ -25,6 +28,8 @@ import com.example.sandwraith8.gr_final.repository.local.ContactRepository;
 import com.example.sandwraith8.gr_final.service.BitmapService;
 import com.example.sandwraith8.gr_final.service.ContactExtractor;
 import com.google.android.gms.vision.Frame;
+import com.google.android.gms.vision.text.Line;
+import com.google.android.gms.vision.text.Text;
 import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
 
@@ -39,6 +44,8 @@ import java.util.Date;
 import java.util.List;
 
 import static android.app.Activity.RESULT_OK;
+import static android.content.ContentValues.TAG;
+import static com.example.sandwraith8.gr_final.common.StringUtil.removeAccent;
 
 /**
  * Created by sandwraith8 on 21/04/2018.
@@ -48,6 +55,7 @@ public class MainFragment extends BaseFragment {
     private static final int REQUEST_GALLERY = 0;
     private static final int REQUEST_CAMERA = 1;
     private ImageView imageView;
+    private Button save;
 
     private String imagePath;
     private TextView displayEmail;
@@ -58,6 +66,12 @@ public class MainFragment extends BaseFragment {
 
     public MainFragment() {
         super(R.layout.activity_main);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putString("imagePath", imagePath);
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -81,6 +95,7 @@ public class MainFragment extends BaseFragment {
         openContacts = v.findViewById(R.id.openContacts);
         galeryButton = v.findViewById(R.id.choose_from_gallery);
         cameraButton = v.findViewById(R.id.take_a_photo);
+        save = v.findViewById(R.id.save);
     }
 
     private void btnListenerInit() {
@@ -147,6 +162,7 @@ public class MainFragment extends BaseFragment {
     private void inspectFromBitmap(Bitmap bitmap) {
         TextRecognizer textRecognizer = new TextRecognizer.Builder(getContext()).build();
         String[] extractData;
+        ArrayList<String> convertedData = new ArrayList<String>();
         try {
             if (!textRecognizer.isOperational()) {
                 new AlertDialog.
@@ -158,8 +174,24 @@ public class MainFragment extends BaseFragment {
             Frame frame = new Frame.Builder().setBitmap(bitmap).build();
             SparseArray<TextBlock> origTextBlocks = textRecognizer.detect(frame);
             List<TextBlock> textBlocks = new ArrayList<>();
+//            List<Line> lines = new ArrayList<>();
+            double maxDistance = 0.0;
+            String lines = "";
+            String name = "";
             for (int i = 0; i < origTextBlocks.size(); i++) {
+                Point[] points = new Point[origTextBlocks.size()];
                 TextBlock textBlock = origTextBlocks.valueAt(i);
+                for (Text line : textBlock.getComponents()){
+                    points = line.getCornerPoints();
+                    Point point1 = points[0];
+                    Point point4 = points[3];
+                    double distance = Math.sqrt((point1.x - point4.x) * (point1.x - point4.x) + (point1.y - point4.y) * (point1.y - point4.y));
+                    if (distance > maxDistance){
+                        name = line.getValue();
+                        maxDistance = distance;
+                    }
+                    lines = lines + line.getValue() + "\n";
+                }
                 textBlocks.add(textBlock);
             }
             Collections.sort(textBlocks, new Comparator<TextBlock>() {
@@ -182,37 +214,57 @@ public class MainFragment extends BaseFragment {
                 }
             }
 
-//            detectedTextView.setText(detectedText);
-            extractData = detectedText.toString().split("\n");
+//            extractData = detectedText.toString().split("\n");
+            extractData = lines.split("\n");
+            for (String data : extractData){
+                data = removeAccent(data);
+                convertedData.add(data);
+            }
 
-            String name = ContactExtractor.getInstance().extractName(extractData);
             if (!StringUtil.isEmpty(name)) {
                 displayName.setText(name);
             }
-            String email = ContactExtractor.getInstance().extractEmail(extractData);
+            String email = ContactExtractor.getInstance().extractEmail(convertedData);
             if (!StringUtil.isEmpty(email)) {
                 displayEmail.setText(email);
             }
-            List<String> phones = ContactExtractor.getInstance().extractPhone(extractData);
+            List<String> phones = ContactExtractor.getInstance().extractPhone(convertedData);
             if (phones.size() > 0) {
                 displayPhone.setText(phones.get(0));
             }
 
-            Contact contact = new Contact();
+            final Contact contact = new Contact();
             contact.setEmail(email);
             contact.setName(name);
             contact.setPhones(phones);
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            bitmap = resizeBitmap(bitmap, bitmap.getHeight() / 3, bitmap.getWidth() / 3);
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
             byte[] byteArray = byteArrayOutputStream.toByteArray();
             String image = Base64.encodeToString(byteArray, Base64.DEFAULT);
             contact.setImage(image);
-            ContactRepository.getInstance().add(contact);
-            Toast.makeText(getContext(), "Your contact have been save", Toast.LENGTH_LONG).show();
+            save.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    ContactRepository.getInstance().add(contact);
+                    Toast.makeText(getContext(), "Your contact have been save", Toast.LENGTH_LONG).show();
+                }
+            });
 //        contact = ContactRepository.getInstance().find(email);
         } finally {
             textRecognizer.release();
         }
+    }
+
+    public static Bitmap resizeBitmap(Bitmap bitmap, int newHeight, int newWidth) {
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+        float scaleWidth = ((float) newWidth) / width;
+        float scaleHeight = ((float) newHeight) / height;
+        Matrix matrix = new Matrix();
+        matrix.postScale(scaleWidth, scaleHeight);
+        Bitmap resizedBitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, false);
+        return resizedBitmap;
     }
 
     private void inspect(Uri uri) {

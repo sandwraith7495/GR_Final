@@ -19,10 +19,10 @@ import java.util.List;
 /**
  * Created by sandwraith8 on 17/04/2018.
  */
-public class RVAdapter extends RecyclerView.Adapter<RVAdapter.ContactViewHolder>{
+public class RVAdapter extends RecyclerView.Adapter<RVAdapter.ContactViewHolder> {
     List<Contact> contacts;
 
-    RVAdapter(List<Contact> contacts){
+    public RVAdapter(List<Contact> contacts) {
         this.contacts = contacts;
     }
 
@@ -37,9 +37,11 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.ContactViewHolder>
     public void onBindViewHolder(ContactViewHolder holder, int position) {
         holder.contactName.setText(contacts.get(position).getName());
         holder.contactEmail.setText(contacts.get(position).getEmail());
-        byte[] decodedString = Base64.decode(contacts.get(position).getImage(), Base64.DEFAULT);
-        Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-        holder.contactImage.setImageBitmap(decodedByte);
+        if (contacts.get(position).getImage() != null) {
+            byte[] decodedString = Base64.decode(contacts.get(position).getImage(), Base64.DEFAULT);
+            Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+            holder.contactImage.setImageBitmap(decodedByte);
+        }
     }
 
     @Override
@@ -63,8 +65,9 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.ContactViewHolder>
             super(itemView);
             cv = itemView.findViewById(R.id.cv);
             contactName = itemView.findViewById(R.id.person_name);
-            contactEmail = itemView.findViewById(R.id.person_age);
+            contactEmail = itemView.findViewById(R.id.person_email);
             contactImage = itemView.findViewById(R.id.person_photo);
+            contactPhone = itemView.findViewById(R.id.person_phone);
         }
     }
 

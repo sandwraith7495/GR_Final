@@ -9,7 +9,5 @@ import com.example.sandwraith8.gr_final.model.Person;
 public interface PersonRepository {
     void add(Person person);
 
-    void edit(Person person);
-
     Person find(String name);
 }

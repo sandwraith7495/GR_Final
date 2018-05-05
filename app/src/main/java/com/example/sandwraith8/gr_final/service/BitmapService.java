@@ -23,7 +23,7 @@ public class BitmapService {
     private BitmapService() {
     }
 
-    public Bitmap decodeSampledBitmapFromFile(String path) { // BEST QUALITY MATCH
+    public Bitmap decodeSampledBitmapFromFile(String path) {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inPreferredConfig = Bitmap.Config.ARGB_8888;
         Bitmap mBitmap = BitmapFactory.decodeFile(path, options);

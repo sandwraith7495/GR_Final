@@ -44,6 +44,7 @@ public class ContactRepository {
         ContentValues values = new ContentValues();
         values.put("name", contact.getName());
         values.put("email", contact.getEmail());
+        values.put("image", contact.getImage());
         StringBuilder phone = new StringBuilder();
         Iterator<String> iterator = contact.getPhones().iterator();
         while (iterator.hasNext()) {
@@ -76,9 +77,10 @@ public class ContactRepository {
         List<Contact> contacts = new ArrayList<>();
         while (cursor.moveToNext()) {
             Contact contact = new Contact();
-            contact.setName(cursor.getString(0));
-            contact.setEmail(cursor.getString(1));
-            String phone = cursor.getString(2);
+            contact.setName(cursor.getString(cursor.getColumnIndex("name")));
+            contact.setEmail(cursor.getString(cursor.getColumnIndex("email")));
+            String phone = cursor.getString(cursor.getColumnIndex("phone"));
+            contact.setImage(cursor.getString(cursor.getColumnIndex("image")));
             if (phone != null) {
                 contact.setPhones(Arrays.asList(phone.split(";")));
             }
