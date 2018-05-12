@@ -14,14 +14,19 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.sandwraith8.gr_final.fragment.ListLocalContact;
 import com.example.sandwraith8.gr_final.fragment.ListServerContact;
 import com.example.sandwraith8.gr_final.fragment.MainFragment;
+import com.example.sandwraith8.gr_final.model.Person;
+import com.example.sandwraith8.gr_final.repository.firebase.FirebasePersonRepository;
+import com.example.sandwraith8.gr_final.repository.firebase.PersonAction;
 import com.example.sandwraith8.gr_final.service.GoogleService;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
@@ -54,6 +59,7 @@ public class Homepage extends AppCompatActivity {
 
         headerView = navigationView.getHeaderView(0);
         final GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
+
         if (account == null) {
             ((TextView) headerView.findViewById(R.id.account)).setText("Khách");
             login.setVisible(true);
@@ -105,6 +111,35 @@ public class Homepage extends AppCompatActivity {
         );
     }
 
+    private void handleSignInResult(final Task<GoogleSignInAccount> completedTask) {
+        try {
+            GoogleSignInAccount account = completedTask.getResult(ApiException.class);
+            String email = account.getEmail();
+            String id = account.getId();
+            final Person newperson = new Person();
+            newperson.setGoogleId(id);
+            newperson.setEmail(email);
+            FirebasePersonRepository.getInstance().find(id, new PersonAction() {
+                @Override
+                public void onGettingSuccessful(Person person) {
+                    if (person == null) {
+                        FirebasePersonRepository.getInstance().add(newperson);
+                        Toast.makeText(getApplicationContext(), "Hello " + completedTask.getResult().getDisplayName(), Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Welcome back " + completedTask.getResult().getDisplayName(), Toast.LENGTH_LONG).show();
+                    }
+                }
+
+                @Override
+                public void onError(String message) {
+
+                }
+            });
+        } catch (ApiException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void changeFragment(Fragment fragment) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.content_frame, fragment);
@@ -117,6 +152,7 @@ public class Homepage extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == RC_SIGN_IN) {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+            handleSignInResult(task);
             ((TextView) headerView.findViewById(R.id.account)).setText(task.getResult().getDisplayName());
             login.setVisible(false);
             server_list.setVisible(true);

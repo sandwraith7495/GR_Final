@@ -28,9 +28,9 @@ public class FirebasePersonRepository extends FirebaseConnection implements Pers
         connection.child("persons").child(person.getGoogleId()).setValue(person);
     }
 
-    public void addContact(Person person, Contact contact) {
-        connection.child("persons").child(person.getGoogleId()).child("contacts").child(contact.getEmail()).setValue(contact);
-    }
+//    public void addContact(Person person, Contact contact) {
+//        connection.child("persons").child(person.getGoogleId()).child("contacts").child(contact.getEmail()).setValue(contact);
+//    }
 
     public void addContact(Person person, List<Contact> contacts) {
         DatabaseReference p = connection.child("persons").child(person.getGoogleId()).child("contacts");

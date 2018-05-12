@@ -13,10 +13,12 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Contact {
+    private String id;
     private String name;
     private List<String> phones = new ArrayList<>();
     private String email;
     private String image;
+    private boolean isSelected = false;
 
     @Override
     public boolean equals(Object o) {
@@ -33,5 +35,13 @@ public class Contact {
         result = 31 * result + (email != null ? email.hashCode() : 0);
         result = 31 * result + (image != null ? image.hashCode() : 0);
         return result;
+    }
+
+    public void setSelected(boolean selected) {
+        isSelected = selected;
+    }
+
+    public boolean isSelected() {
+        return isSelected;
     }
 }

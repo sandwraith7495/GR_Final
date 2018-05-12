@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="154dp"
     android:padding="5.2dp"
+    android:clickable="true"
     android:layout_marginTop="5.2dp"
     >
     <ImageView
@@ -38,14 +39,15 @@
             android:textSize="17dp"
             android:id="@+id/person_email"
             />
-        <ListView
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="50.6dp"
             android:id="@+id/person_phone"
+            android:text="0123456789"
             android:gravity="center_vertical"
             android:textStyle="bold"
             android:textSize="17dp">
 
-        </ListView>
+        </TextView>
     </LinearLayout>
 </RelativeLayout>

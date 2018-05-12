@@ -119,4 +119,11 @@ public class ContactRepository {
         cursor.close();
         return contact;
     }
+
+    public void delete(String id){
+        SQLiteDatabase db = database.getReadableDatabase();
+        db.delete("contact","id = ?", new String[]{id});
+        db.close();
+    }
+
 }

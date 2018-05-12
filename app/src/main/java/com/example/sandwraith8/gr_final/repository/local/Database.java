@@ -48,12 +48,6 @@ public class Database extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(sql.toString());
     }
 
-    public void delete(String email){
-        SQLiteDatabase db = this.getWritableDatabase();
-        db.delete("contact", email + " = ?", new String[]{email});
-        db.close();
-    }
-
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
 
