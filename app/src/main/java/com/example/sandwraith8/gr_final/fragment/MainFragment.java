@@ -13,7 +13,6 @@ import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
 import android.util.Base64;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
 import android.widget.Button;
@@ -28,7 +27,6 @@ import com.example.sandwraith8.gr_final.repository.local.ContactRepository;
 import com.example.sandwraith8.gr_final.service.BitmapService;
 import com.example.sandwraith8.gr_final.service.ContactExtractor;
 import com.google.android.gms.vision.Frame;
-import com.google.android.gms.vision.text.Line;
 import com.google.android.gms.vision.text.Text;
 import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
@@ -42,9 +40,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import static android.app.Activity.RESULT_OK;
-import static android.content.ContentValues.TAG;
 import static com.example.sandwraith8.gr_final.common.StringUtil.removeAccent;
 
 /**
@@ -63,6 +61,8 @@ public class MainFragment extends BaseFragment {
     private TextView displayName;
     private TextView openContacts;
     private Button galeryButton, cameraButton;
+
+    private Contact contact;
 
     public MainFragment() {
         super(R.layout.activity_main);
@@ -136,6 +136,15 @@ public class MainFragment extends BaseFragment {
                 }
             }
         });
+        save.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                contact.setName(displayName.getText().toString());
+                contact.setEmail(displayEmail.getText().toString());
+                ContactRepository.getInstance().add(contact);
+                Toast.makeText(getContext(), "Your contact have been save", Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     private void galleryAddPic() {
@@ -162,7 +171,7 @@ public class MainFragment extends BaseFragment {
     private void inspectFromBitmap(Bitmap bitmap) {
         TextRecognizer textRecognizer = new TextRecognizer.Builder(getContext()).build();
         String[] extractData;
-        ArrayList<String> convertedData = new ArrayList<String>();
+        ArrayList<String> convertedData = new ArrayList<>();
         try {
             if (!textRecognizer.isOperational()) {
                 new AlertDialog.
@@ -181,12 +190,12 @@ public class MainFragment extends BaseFragment {
             for (int i = 0; i < origTextBlocks.size(); i++) {
                 Point[] points = new Point[origTextBlocks.size()];
                 TextBlock textBlock = origTextBlocks.valueAt(i);
-                for (Text line : textBlock.getComponents()){
+                for (Text line : textBlock.getComponents()) {
                     points = line.getCornerPoints();
                     Point point1 = points[0];
                     Point point4 = points[3];
                     double distance = Math.sqrt((point1.x - point4.x) * (point1.x - point4.x) + (point1.y - point4.y) * (point1.y - point4.y));
-                    if (distance > maxDistance){
+                    if (distance > maxDistance) {
                         name = line.getValue();
                         maxDistance = distance;
                     }
@@ -216,7 +225,7 @@ public class MainFragment extends BaseFragment {
 
 //            extractData = detectedText.toString().split("\n");
             extractData = lines.split("\n");
-            for (String data : extractData){
+            for (String data : extractData) {
                 data = removeAccent(data);
                 convertedData.add(data);
             }
@@ -233,7 +242,8 @@ public class MainFragment extends BaseFragment {
                 displayPhone.setText(phones.get(0));
             }
 
-            final Contact contact = new Contact();
+            contact = new Contact();
+            contact.setId(UUID.randomUUID().toString());
             contact.setEmail(email);
             contact.setName(name);
             contact.setPhones(phones);
@@ -243,14 +253,7 @@ public class MainFragment extends BaseFragment {
             byte[] byteArray = byteArrayOutputStream.toByteArray();
             String image = Base64.encodeToString(byteArray, Base64.DEFAULT);
             contact.setImage(image);
-            save.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    ContactRepository.getInstance().add(contact);
-                    Toast.makeText(getContext(), "Your contact have been save", Toast.LENGTH_LONG).show();
-                }
-            });
-//        contact = ContactRepository.getInstance().find(email);
+
         } finally {
             textRecognizer.release();
         }

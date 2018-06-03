@@ -8,6 +8,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -43,7 +44,8 @@ public class FirebasePersonRepository extends FirebaseConnection implements Pers
         ValueEventListener listener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                Person person = dataSnapshot.getValue(Person.class);
+                Person.FirebasePerson firebasePerson = dataSnapshot.getValue(Person.FirebasePerson.class);
+                Person person = parse(firebasePerson);
                 action.onGettingSuccessful(person);
             }
 
@@ -55,11 +57,26 @@ public class FirebasePersonRepository extends FirebaseConnection implements Pers
         connection.child("persons").child(id).addListenerForSingleValueEvent(listener);
     }
 
+    private Person parse(Person.FirebasePerson firebasePerson) {
+        List<String> ids = new ArrayList<>(firebasePerson.getContacts().keySet());
+        List<Contact> personContacts = new ArrayList<>(firebasePerson.getContacts().values());
+        Person person = new Person();
+        person.setEmail(firebasePerson.getEmail());
+        person.setGoogleId(firebasePerson.getGoogleId());
+        for (int i = 0; i < personContacts.size(); i++) {
+            Contact contact = personContacts.get(i);
+            contact.setId(ids.get(i));
+            person.getContacts().add(contact);
+        }
+        return person;
+    }
+
     public void findLive(String id, final PersonAction action) {
         ValueEventListener listener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                Person person = dataSnapshot.getValue(Person.class);
+                Person.FirebasePerson firebasePerson = dataSnapshot.getValue(Person.FirebasePerson.class);
+                Person person = parse(firebasePerson);
                 action.onGettingSuccessful(person);
             }
 
@@ -69,6 +86,11 @@ public class FirebasePersonRepository extends FirebaseConnection implements Pers
             }
         };
         connection.child("persons").child(id).addValueEventListener(listener);
+    }
+
+    public void delete(String id, Person person) {
+        DatabaseReference p = connection.child("persons").child(person.getGoogleId()).child("contacts");
+        p.child(id).removeValue();
     }
 
     @Override

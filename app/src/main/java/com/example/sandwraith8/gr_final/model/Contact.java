@@ -1,5 +1,6 @@
 package com.example.sandwraith8.gr_final.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +13,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class Contact {
+public class Contact implements Serializable {
     private String id;
     private String name;
     private List<String> phones = new ArrayList<>();

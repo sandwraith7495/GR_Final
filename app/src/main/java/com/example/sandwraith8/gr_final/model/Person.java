@@ -17,12 +17,23 @@ import lombok.Setter;
 public class Person {
     private String googleId;
     private String email;
-    private Map<String, Contact> contacts = new HashMap<>();
+    private List<Contact> contacts = new ArrayList<>();
 
     public Person(String googleId) {
         this.googleId = googleId;
     }
 
     public Person() {
+    }
+
+    @Getter
+    @Setter
+    public static class FirebasePerson {
+        private String googleId;
+        private String email;
+        private Map<String, Contact> contacts = new HashMap<>();
+
+        public FirebasePerson() {
+        }
     }
 }

@@ -42,6 +42,7 @@ public class ContactRepository {
     public void add(Contact contact) {
         SQLiteDatabase db = database.getWritableDatabase();
         ContentValues values = new ContentValues();
+        values.put("id", contact.getId());
         values.put("name", contact.getName());
         values.put("email", contact.getEmail());
         values.put("image", contact.getImage());
@@ -60,6 +61,7 @@ public class ContactRepository {
     public List<Contact> findAll() {
         SQLiteDatabase db = database.getReadableDatabase();
         String[] projection = {
+                "id",
                 "name",
                 "email",
                 "phone",
@@ -79,6 +81,7 @@ public class ContactRepository {
             Contact contact = new Contact();
             contact.setName(cursor.getString(cursor.getColumnIndex("name")));
             contact.setEmail(cursor.getString(cursor.getColumnIndex("email")));
+            contact.setId(cursor.getString(cursor.getColumnIndex("id")));
             String phone = cursor.getString(cursor.getColumnIndex("phone"));
             contact.setImage(cursor.getString(cursor.getColumnIndex("image")));
             if (phone != null) {
@@ -121,7 +124,7 @@ public class ContactRepository {
     }
 
     public void delete(String id){
-        SQLiteDatabase db = database.getReadableDatabase();
+        SQLiteDatabase db = database.getWritableDatabase();
         db.delete("contact","id = ?", new String[]{id});
         db.close();
     }

@@ -91,6 +91,7 @@
         android:layout_gravity="center_horizontal"
         android:background="#167865"
         android:gravity="center"
+        android:visibility="gone"
         android:text="Add to Contacts!"
         tools:text="Run OCR!" />
 
@@ -101,6 +102,7 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
+        android:visibility="gone"
         android:text="List Contact" />
 
     <Button
@@ -119,6 +121,7 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
+        android:visibility="gone"
         android:text="Sign out" />
 
 </RelativeLayout>
